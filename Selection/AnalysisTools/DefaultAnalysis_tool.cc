@@ -335,7 +335,7 @@ void DefaultAnalysis::analyzeEvent(art::Event const &e, bool fData)
   }
   
   // storing trigger result output for software trigger
-  art::InputTag swtrig_tag("TriggerResults", "", "DataOverlayOptical");
+  art::InputTag swtrig_tag("TriggerResults", "", "DataOverlayOpticalNuMI");
   art::Handle<art::TriggerResults> swtrig_handle;
   e.getByLabel(swtrig_tag, swtrig_handle);
   if (swtrig_handle.isValid())
