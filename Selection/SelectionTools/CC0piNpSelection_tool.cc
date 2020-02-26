@@ -134,6 +134,7 @@ private:
     unsigned int _n_showers_contained; /**< Number of showers with a starting point within the fiducial volume */
     unsigned int _n_tracks_contained;  /**< Number of tracks fully contained in the fiducial volume */
     unsigned int _shr_hits_max;        /**< Number of hits of the leading shower */
+    unsigned int _shr_hits_second;     /**< Number of hits of the secondary leading shower */
     unsigned int _trk_hits_max;        /**< Number of hits of the leading track */
     unsigned int _shr_hits_tot;        /**< Total number of shower hits */
     unsigned int _trk_hits_tot;        /**< Total number of track hits */
@@ -144,6 +145,7 @@ private:
     unsigned int _shr_hits_v_tot;      /**< Total number of shower hits on the V plane */
     unsigned int _shr_hits_u_tot;      /**< Total number of shower hits on the U plane */
     float _shr_energy;                 /**< Energy of the shower with the largest number of hits (in GeV) */
+    float _shr_energy_second;          /**< Energy of the shower with the second largest number of hits (in GeV) */
     float _shr_energy_tot;             /**< Sum of the energy of the showers (in GeV) */
     float _shr_energy_cali;            /**< Energy of the calibrated shower with the largest number of hits (in GeV) */
     float _shr_energy_tot_cali;        /**< Sum of the energy of the calibrated showers (in GeV) */
@@ -345,6 +347,8 @@ CC0piNpSelection::CC0piNpSelection(const fhicl::ParameterSet &pset)
     llr_pid_calculator_shr.set_dedx_binning(2, electronphoton_parameters.dedx_edges_pl_2);
     llr_pid_calculator_shr.set_par_binning(2, electronphoton_parameters.parameters_edges_pl_2);
     llr_pid_calculator_shr.set_lookup_tables(2, electronphoton_parameters.dedx_pdf_pl_2);
+
+
 
     if (fRecalibrateHits){
       llr_pid_calculator_shr.set_corr_par_binning(0, correction_parameters.parameter_correction_edges_pl_0);
@@ -724,11 +728,17 @@ bool CC0piNpSelection::selectEvent(art::Event const &e,
                     _shr_start_y = shr->ShowerStart().Y();
                     _shr_start_z = shr->ShowerStart().Z();
 
+
+		    _shr_energy_second = _shr_energy; 
                     _shr_energy = shr->Energy()[2] / 1000; // GeV
+
                     _shr_energy_cali = _shr_energy * cali_corr[2];
 
                     _shr_pfp_id = i_pfp;
+
+		    _shr_hits_second = _shr_hits_max; 
                     _shr_hits_max = shr_hits;
+
                     _shr_score = trkshrscore;
                     _shr_theta = shr->Direction().Theta();
                     _shr_phi = shr->Direction().Phi();
@@ -935,6 +945,12 @@ bool CC0piNpSelection::selectEvent(art::Event const &e,
 			_shr_llrpid_dedx = atan(_shr_llrpid_dedx / 100.) * 2 / 3.14159266;
                     }
                 }
+		// case where shr_hits isn't bigger than max, but still bigger than what's currently in 2nd place	
+		else if (shr_hits > _shr_hits_second) { 
+		    _shr_hits_second = shr_hits;
+		    _shr_energy_second = shr->Energy()[2] / 1000; // GeV
+		}
+
             }
 
             for (const auto &trk : pfp_pxy.get<recob::Track>())
@@ -1456,6 +1472,7 @@ void CC0piNpSelection::setBranches(TTree *_tree)
 
     _tree->Branch("shr_energy_tot", &_shr_energy_tot, "shr_energy_tot/F");
     _tree->Branch("shr_energy", &_shr_energy, "shr_energy/F");
+    _tree->Branch("shr_energy_second", &_shr_energy_second, "shr_energy_second/F");
     _tree->Branch("shr_energy_tot_cali", &_shr_energy_tot_cali, "shr_energy_tot_cali/F");
     _tree->Branch("shr_energy_cali", &_shr_energy_cali, "shr_energy_cali/F");
     _tree->Branch("shr_theta", &_shr_theta, "shr_theta/F");
@@ -1581,6 +1598,7 @@ void CC0piNpSelection::setBranches(TTree *_tree)
 
     _tree->Branch("trk_hits_max", &_trk_hits_max, "trk_hits_max/i");
     _tree->Branch("shr_hits_max", &_shr_hits_max, "shr_hits_max/i");
+    _tree->Branch("shr_hits_second", &_shr_hits_second, "shr_hits_second/i");
 
     _tree->Branch("trkshrhitdist0", &_trkshrhitdist0, "trkshrhitdist0/F");
     _tree->Branch("trkshrhitdist1", &_trkshrhitdist1, "trkshrhitdist1/F");
