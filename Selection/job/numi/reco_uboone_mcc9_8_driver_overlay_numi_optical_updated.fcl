@@ -1,9 +1,0 @@
-#include "reco_uboone_mcc9_8_driver_overlay_optical.fcl"
-
-process_name: DataOverlayOpticalNuMI
-
-physics.filters.opfiltercommon: @local::physics.filters.opfiltercommonextnumi
-physics.filters.opfiltercommon.OpHitProducer: "ophitBeam"
-
-physics.filters.swtrigger.OpDataModule: "mixer"
-physics.filters.swtrigger.DAQHeaderModule: "mixer"
