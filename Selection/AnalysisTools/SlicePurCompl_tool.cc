@@ -429,7 +429,8 @@ void SlicePurCompl::fillId(const std::vector<double> &p, const simb::MCParticle 
 {
   for (unsigned int ip = 0; ip < p.size(); ip++)
   {
-    if (std::abs(p[ip] - mcp.P()) < 0.00000001)
+    std::cout << "[Krish: Backtracking Info]" <<std::abs(p[ip]) << "  " << mcp.P() <<" " << std::abs(p[ip] - mcp.P()) <<std::endl; 
+    if (std::abs(p[ip] - mcp.P()) < 1e-4)
     {
       id.push_back(mcp.TrackId());
     }
